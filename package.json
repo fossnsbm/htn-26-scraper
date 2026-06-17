@@ -1,0 +1,19 @@
+{
+  "name": "htn-scraper",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun run index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "convex": "^1.41.0",
+    "puppeteer": "^25.1.0"
+  }
+}
