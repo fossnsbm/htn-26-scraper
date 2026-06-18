@@ -17,7 +17,7 @@ interface ChallengesResponse {
 
 const CONTEST_SLUG = process.env.CONTEST_SLUG
 
-async function scrapeContest() {
+async function scrapeChallenges() {
   if (!process.env.HACKERRANK_EMAIL || !process.env.HACKERRANK_PASSWORD || !process.env.SCRAPER_SECRET || !process.env.CONVEX_URL || !CONTEST_SLUG) {
     console.log('Envs not set')
     return
@@ -53,3 +53,4 @@ async function scrapeContest() {
 }
 
 await scrapeContest()
+Bun.argv[2] === 'challenges' && await scrapeChallenges()

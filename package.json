@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "start": "bun run index.ts"
+    "scrape:challenges": "bun run index.ts challenges",
   },
   "devDependencies": {
     "@types/bun": "latest"
