@@ -15,6 +15,21 @@ interface ChallengesResponse {
   total: number;
 }
 
+interface Submission {
+  status: string;
+  created_at: number;
+  hacker_username: string;
+  challenge: {
+    name: string;
+    slug: string;
+  };
+}
+
+interface SubmissionsResponse {
+  models: Submission[];
+  total: number;
+}
+
 const CONTEST_SLUG = process.env.CONTEST_SLUG
 
 async function scrapeChallenges() {
@@ -52,5 +67,44 @@ async function scrapeChallenges() {
   await browser.close();
 }
 
-await scrapeContest()
+async function pollSubmissions() {
+  if (!process.env.HACKERRANK_EMAIL || !process.env.HACKERRANK_PASSWORD || !process.env.SCRAPER_SECRET || !process.env.CONVEX_URL || !CONTEST_SLUG) {
+    console.log('Envs not set')
+    return
+  }
+
+  const { page } = await init()
+
+  await authenticate(page, { username: process.env.HACKERRANK_EMAIL, password: process.env.HACKERRANK_PASSWORD })
+
+  const convex = new ConvexHttpClient(process.env.CONVEX_URL!);
+
+  setInterval(async () => {
+    console.log('poliling submissions')
+    const { models } = await fetchJSON(page,
+      `https://www.hackerrank.com/rest/contests/${CONTEST_SLUG}/judge_submissions?limit=400`) as SubmissionsResponse
+
+    if (!models) {
+      console.log('error fetching submissions')
+      return
+    }
+
+    const accepted = models.filter(s => s.status === 'Accepted');
+
+    if (accepted.length === 0) return;
+
+    await convex.mutation(anyApi.challenges!.updateChallengeProgress as any, {
+      secret: process.env.SCRAPER_SECRET,
+      submissions: accepted.map(s => ({
+        hackerUsername: s.hacker_username,
+        challengeSlug: s.challenge.slug,
+        solvedAt: s.created_at,
+      }))
+    });
+
+    console.log(`Synced ${accepted.length} accepted submissions`);
+  }, 60_000)
+}
+
 Bun.argv[2] === 'challenges' && await scrapeChallenges()
+Bun.argv[2] === 'submissions' && await pollSubmissions()

@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "scrape:challenges": "bun run index.ts challenges",
+    "scrape:submissions": "bun run index.ts submissions"
   },
   "devDependencies": {
     "@types/bun": "latest"
