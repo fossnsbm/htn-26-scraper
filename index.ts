@@ -1,5 +1,4 @@
-import puppeteer from 'puppeteer';
-import { fetchJSON } from './lib/helpers';
+import { authenticate, fetchJSON, init } from './lib/helpers';
 import { ConvexHttpClient } from 'convex/browser';
 import { anyApi } from 'convex/server';
 
@@ -24,34 +23,9 @@ async function scrapeContest() {
     return
   }
 
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-blink-features=AutomationControlled',
-    ]
-  });
+  const { browser, page } = await init()
 
-  const page = await browser.newPage();
-  await page.setUserAgent({
-    userAgent:
-      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-  });
-
-  await page.evaluateOnNewDocument(() => {
-    Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-  });
-
-  await page.goto('https://www.hackerrank.com/auth/login', { waitUntil: 'networkidle2' });
-
-  await page.waitForSelector('input[name="username"]', { timeout: 2000 });
-  await page.type('input[name="username"]', process.env.HACKERRANK_EMAIL);
-  await page.type('input[name="password"]', process.env.HACKERRANK_PASSWORD);
-  await page.click('button[type="submit"]');
-
-  await page.waitForNavigation({ waitUntil: 'networkidle2' });
-  console.log('Logged in, current URL:', page.url());
+  await authenticate(page, { username: process.env.HACKERRANK_EMAIL, password: process.env.HACKERRANK_PASSWORD })
 
   const { models } = await fetchJSON(page,
     `https://www.hackerrank.com/rest/contests/${CONTEST_SLUG}/challenges?limit=100`) as ChallengesResponse
