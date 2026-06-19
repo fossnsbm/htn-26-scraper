@@ -6,6 +6,7 @@ interface Challenge {
   slug: string
   name: string
   category: string
+  difficulty_name: string
   preview: string
   max_score: number
 }
@@ -58,6 +59,7 @@ async function scrapeChallenges() {
       slug: c.slug,
       name: c.name,
       category: c.category,
+      difficulty: c.difficulty_name.toLowerCase(),
       preview: c.preview,
       max_score: c.max_score
     }))
