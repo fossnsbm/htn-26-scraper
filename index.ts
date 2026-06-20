@@ -82,7 +82,7 @@ async function pollSubmissions() {
   const convex = new ConvexHttpClient(process.env.CONVEX_URL!);
 
   setInterval(async () => {
-    console.log('poliling submissions')
+    console.log('polling submissions')
     const { models } = await fetchJSON(page,
       `https://www.hackerrank.com/rest/contests/${CONTEST_SLUG}/judge_submissions?limit=400`) as SubmissionsResponse
 
